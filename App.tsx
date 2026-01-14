@@ -9,7 +9,7 @@ import Admin from './pages/Admin';
 
 const App: React.FC = () => {
   return (
-    <BrowserRouter>
+    <BrowserRouter basename="/rootedworkout">
       <Routes>
         <Route path="/" element={<EmailEntry />} />
         <Route path="/onboarding" element={<Onboarding />} />
