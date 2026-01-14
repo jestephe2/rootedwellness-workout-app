@@ -51,6 +51,9 @@ export async function onboardUser(userData: {
   biggest_obstacle?: string;
 }): Promise<OnboardResponse> {
   try {
+    console.log('[ONBOARD] Sending request to:', ONBOARD_URL);
+    console.log('[ONBOARD] Request data:', userData);
+
     const response = await fetch(ONBOARD_URL, {
       method: 'POST',
       headers: {
@@ -59,13 +62,32 @@ export async function onboardUser(userData: {
       body: JSON.stringify(userData),
     });
 
-    if (!response.ok) {
-      throw new Error(`API Error: ${response.status}`);
+    console.log('[ONBOARD] Response status:', response.status);
+    console.log('[ONBOARD] Response headers:', Object.fromEntries(response.headers.entries()));
+
+    // Try to get the response body regardless of status
+    const responseText = await response.text();
+    console.log('[ONBOARD] Response body (raw):', responseText);
+
+    // Try to parse as JSON
+    let responseData;
+    try {
+      responseData = JSON.parse(responseText);
+      console.log('[ONBOARD] Response body (parsed):', responseData);
+    } catch (parseError) {
+      console.error('[ONBOARD] Failed to parse response as JSON:', parseError);
+      throw new Error(`Invalid JSON response: ${responseText.substring(0, 100)}`);
     }
 
-    return await response.json();
+    // Check if response is ok (200-299 status)
+    if (!response.ok) {
+      console.error('[ONBOARD] Non-OK status received:', response.status);
+      throw new Error(`API Error: ${response.status} - ${responseText}`);
+    }
+
+    return responseData;
   } catch (error) {
-    console.error('Onboard user error:', error);
+    console.error('[ONBOARD] Error during onboarding:', error);
     throw error;
   }
 }
