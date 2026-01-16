@@ -1,25 +1,43 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Lock, ArrowRight } from 'lucide-react';
+import { adminAuth } from '../services/api';
 
 const AdminLogin: React.FC = () => {
   const navigate = useNavigate();
   const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
 
-    const adminPassword = import.meta.env.VITE_ADMIN_PASSWORD;
+    if (!password.trim()) {
+      setError('Please enter a password');
+      return;
+    }
 
-    if (password === adminPassword) {
-      // Set admin session
-      localStorage.setItem('rsw_admin_session', 'true');
-      navigate('/admin');
-    } else {
-      setError('Incorrect password');
-      setPassword('');
+    setIsLoading(true);
+
+    try {
+      const result = await adminAuth(password);
+
+      if (result.status === 'ok' && result.session_token) {
+        // Store session token and expiration
+        localStorage.setItem('rsw_admin_session', result.session_token);
+        if (result.expires_at) {
+          localStorage.setItem('rsw_admin_expires', result.expires_at);
+        }
+        navigate('/admin');
+      } else {
+        setError(result.message || 'Incorrect password');
+        setPassword('');
+      }
+    } catch (err) {
+      setError('Unable to connect. Please try again.');
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -68,10 +86,17 @@ const AdminLogin: React.FC = () => {
 
             <button
               type="submit"
-              className="w-full bg-brand-text text-white py-4 px-6 rounded-full font-semibold hover:bg-brand-text/90 transition-all flex items-center justify-center gap-2 shadow-lg"
+              disabled={isLoading}
+              className="w-full bg-brand-text text-white py-4 px-6 rounded-full font-semibold hover:bg-brand-text/90 transition-all flex items-center justify-center gap-2 shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              <span>Access Admin</span>
-              <ArrowRight size={20} />
+              {isLoading ? (
+                <span>Authenticating...</span>
+              ) : (
+                <>
+                  <span>Access Admin</span>
+                  <ArrowRight size={20} />
+                </>
+              )}
             </button>
           </form>
         </div>

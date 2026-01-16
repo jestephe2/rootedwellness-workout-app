@@ -13,11 +13,27 @@ const Admin: React.FC = () => {
   const [importError, setImportError] = useState<string | null>(null);
   const [publishSuccess, setPublishSuccess] = useState(false);
 
-  // Check admin session
+  // Check admin session and expiration
   useEffect(() => {
-    const isAdmin = localStorage.getItem('rsw_admin_session');
-    if (!isAdmin) {
+    const sessionToken = localStorage.getItem('rsw_admin_session');
+    const expiresAt = localStorage.getItem('rsw_admin_expires');
+
+    if (!sessionToken) {
       navigate('/admin/login');
+      return;
+    }
+
+    // Check if session has expired
+    if (expiresAt) {
+      const expirationDate = new Date(expiresAt);
+      const now = new Date();
+
+      if (now >= expirationDate) {
+        // Session expired, clear and redirect
+        localStorage.removeItem('rsw_admin_session');
+        localStorage.removeItem('rsw_admin_expires');
+        navigate('/admin/login');
+      }
     }
   }, [navigate]);
 
@@ -63,6 +79,7 @@ const Admin: React.FC = () => {
 
   const handleLogout = () => {
     localStorage.removeItem('rsw_admin_session');
+    localStorage.removeItem('rsw_admin_expires');
     navigate('/admin/login');
   };
 

@@ -1,5 +1,9 @@
 /* RSW Workout App - Global Styles */
 
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
 * {
   margin: 0;
   padding: 0;
@@ -8,6 +12,8 @@
 
 body {
   font-family: 'Inter', sans-serif;
+  background-color: #edede4;
+  color: #2d3025;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
@@ -32,4 +38,11 @@ input[type="number"] {
 /* Smooth scrolling */
 html {
   scroll-behavior: smooth;
+}
+
+/* Safe area support for iPhone notches */
+@supports (padding: env(safe-area-inset-bottom)) {
+  body {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
 }

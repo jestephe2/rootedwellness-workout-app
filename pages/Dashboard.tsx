@@ -441,7 +441,7 @@ const Dashboard: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-brand-cream font-sans text-brand-text max-w-md mx-auto pb-24">
+    <div className="min-h-screen bg-brand-cream font-sans text-brand-text max-w-md mx-auto pb-28">
       {/* Header */}
       <header className="bg-white px-6 py-6 shadow-sm">
         <h1 className="text-2xl font-bold">
@@ -452,7 +452,7 @@ const Dashboard: React.FC = () => {
         </p>
         {workoutStatus === 'in_progress' && totalSets > 0 && (
           <div className="mt-3">
-            <div className="flex items-center justify-between text-xs text-brand-beige mb-1">
+            <div className="flex items-center justify-between text-sm text-brand-beige mb-1">
               <span>{completedSets} of {totalSets} sets logged</span>
             </div>
             <div className="w-full bg-brand-cream rounded-full h-2">
@@ -497,7 +497,7 @@ const Dashboard: React.FC = () => {
               <div className="flex gap-3">
                 <button
                   onClick={() => handleDaysPerWeekChange(3)}
-                  className={`flex-1 py-3 px-6 rounded-full font-semibold transition-all ${
+                  className={`flex-1 py-4 px-6 rounded-full font-semibold transition-all min-h-[52px] ${
                     daysPerWeek === 3
                       ? 'bg-brand-green text-white shadow-md'
                       : 'bg-brand-cream text-brand-text hover:bg-brand-beige/30'
@@ -507,7 +507,7 @@ const Dashboard: React.FC = () => {
                 </button>
                 <button
                   onClick={() => handleDaysPerWeekChange(4)}
-                  className={`flex-1 py-3 px-6 rounded-full font-semibold transition-all ${
+                  className={`flex-1 py-4 px-6 rounded-full font-semibold transition-all min-h-[52px] ${
                     daysPerWeek === 4
                       ? 'bg-brand-green text-white shadow-md'
                       : 'bg-brand-cream text-brand-text hover:bg-brand-beige/30'
@@ -528,7 +528,7 @@ const Dashboard: React.FC = () => {
                   <button
                     key={week}
                     onClick={() => setSelectedWeek(week)}
-                    className={`py-3 rounded-2xl font-semibold transition-all ${
+                    className={`py-4 rounded-2xl font-semibold transition-all min-h-[48px] ${
                       selectedWeek === week
                         ? 'bg-brand-green text-white shadow-md'
                         : 'bg-brand-cream text-brand-text hover:bg-brand-beige/30'
@@ -550,7 +550,7 @@ const Dashboard: React.FC = () => {
                   <button
                     key={dayNum}
                     onClick={() => setSelectedDay(dayNum)}
-                    className={`py-3 px-4 rounded-2xl font-semibold transition-all text-sm ${
+                    className={`py-4 px-4 rounded-2xl font-semibold transition-all text-sm min-h-[48px] ${
                       selectedDay === dayNum
                         ? 'bg-brand-green text-white shadow-md'
                         : 'bg-brand-cream text-brand-text hover:bg-brand-beige/30'
@@ -646,6 +646,7 @@ const Dashboard: React.FC = () => {
                               </label>
                               <input
                                 type="number"
+                                inputMode="decimal"
                                 min="0"
                                 step="5"
                                 value={weights[exercise.name]?.[setNum] || ''}
@@ -653,17 +654,17 @@ const Dashboard: React.FC = () => {
                                 onBlur={() => handleWeightBlur(exercise.name, setNum)}
                                 placeholder="Weight (lbs)"
                                 disabled={workoutStatus === 'completed'}
-                                className="w-full px-4 py-3 rounded-full bg-brand-cream text-brand-text border-2 border-transparent focus:border-brand-green focus:outline-none transition-colors disabled:opacity-50"
+                                className="w-full px-4 py-4 rounded-full bg-brand-cream text-brand-text text-base border-2 border-transparent focus:border-brand-green focus:outline-none transition-colors disabled:opacity-50 min-h-[48px]"
                               />
                             </div>
                             {savingStates[exercise.name]?.[setNum] && (
-                              <div className="text-brand-tan text-xs mt-6">
+                              <div className="text-brand-tan text-sm mt-6">
                                 Saving...
                               </div>
                             )}
                             {savedStates[exercise.name]?.[setNum] && (
-                              <div className="flex items-center gap-1 text-brand-green text-xs mt-6">
-                                <Check size={14} />
+                              <div className="flex items-center gap-1 text-brand-green text-sm mt-6">
+                                <Check size={16} />
                                 <span>Saved</span>
                               </div>
                             )}
@@ -712,7 +713,7 @@ const Dashboard: React.FC = () => {
           ) : workoutStatus === 'in_progress' ? (
             <button
               onClick={completeWorkout}
-              className="w-full bg-brand-green text-white py-3 px-6 rounded-full font-semibold text-sm shadow-lg hover:bg-brand-green/90 transition-all"
+              className="w-full bg-brand-green text-white py-4 px-6 rounded-full font-semibold shadow-lg hover:bg-brand-green/90 transition-all min-h-[56px]"
             >
               Click me when done!
             </button>
@@ -723,7 +724,7 @@ const Dashboard: React.FC = () => {
       {/* Post-Workout Reflection Modal */}
       {showReflection && (
         <div className="fixed inset-0 bg-black/50 flex items-end justify-center z-50 max-w-md mx-auto">
-          <div className="bg-white rounded-t-4xl w-full p-6 pb-8 space-y-6 animate-slide-up">
+          <div className="bg-white rounded-t-4xl w-full p-6 pb-8 space-y-6 animate-slide-up max-h-[85vh] overflow-y-auto">
             <div className="text-center">
               <h2 className="text-2xl font-bold text-brand-text">Great Work!</h2>
               <p className="text-sm text-brand-tan mt-2">How did this workout feel?</p>
@@ -744,7 +745,7 @@ const Dashboard: React.FC = () => {
                 <button
                   key={mood.label}
                   onClick={() => toggleMood(mood.label)}
-                  className={`py-3 px-4 rounded-2xl border-2 transition-all text-left ${
+                  className={`py-4 px-4 rounded-2xl border-2 transition-all text-left min-h-[60px] ${
                     reflectionMoods.includes(mood.label)
                       ? 'border-brand-green bg-brand-green/10'
                       : 'border-brand-beige/30 bg-white hover:border-brand-green/50'
@@ -787,7 +788,7 @@ const Dashboard: React.FC = () => {
       {/* Post-Workout Nourishment Screen */}
       {showNourishment && (
         <div className="fixed inset-0 bg-black/50 flex items-end justify-center z-50 max-w-md mx-auto">
-          <div className="bg-white rounded-t-4xl w-full p-6 pb-8 space-y-6 animate-slide-up max-h-[90vh] overflow-y-auto">
+          <div className="bg-white rounded-t-4xl w-full p-6 pb-8 space-y-6 animate-slide-up max-h-[85vh] overflow-y-auto">
             <div className="text-center space-y-2">
               <h2 className="text-2xl font-bold text-brand-text">
                 Great job, you showed up for yourself! 🎉

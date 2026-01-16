@@ -4,6 +4,7 @@ import {
   OnboardResponse,
   LogWeightResponse,
   GetLogsResponse,
+  AdminAuthResponse,
   User,
   WorkoutLog
 } from '../types';
@@ -13,6 +14,24 @@ const INIT_URL = import.meta.env.VITE_N8N_INIT_URL;
 const ONBOARD_URL = import.meta.env.VITE_N8N_ONBOARD_URL;
 const LOG_WEIGHT_URL = import.meta.env.VITE_N8N_LOG_WEIGHT_URL;
 const GET_LOGS_URL = import.meta.env.VITE_N8N_GET_LOGS_URL;
+const ADMIN_AUTH_URL = import.meta.env.VITE_N8N_ADMIN_AUTH_URL;
+
+// Validate environment variables are configured
+function validateEnvVars() {
+  const missing = [];
+  if (!INIT_URL || INIT_URL.includes('YOUR_N8N')) missing.push('VITE_N8N_INIT_URL');
+  if (!ONBOARD_URL || ONBOARD_URL.includes('YOUR_N8N')) missing.push('VITE_N8N_ONBOARD_URL');
+  if (!LOG_WEIGHT_URL || LOG_WEIGHT_URL.includes('YOUR_N8N')) missing.push('VITE_N8N_LOG_WEIGHT_URL');
+  if (!GET_LOGS_URL || GET_LOGS_URL.includes('YOUR_N8N')) missing.push('VITE_N8N_GET_LOGS_URL');
+
+  if (missing.length > 0) {
+    throw new Error(
+      `Missing n8n webhook URLs in .env.local:\n${missing.join('\n')}\n\n` +
+      `Please update your .env.local file with your actual n8n webhook URLs.\n` +
+      `See docs/N8N_SETUP.md for instructions.`
+    );
+  }
+}
 
 /**
  * POST to n8n init webhook
@@ -20,6 +39,8 @@ const GET_LOGS_URL = import.meta.env.VITE_N8N_GET_LOGS_URL;
  */
 export async function initUser(email: string): Promise<InitResponse> {
   try {
+    validateEnvVars();
+
     const response = await fetch(INIT_URL, {
       method: 'POST',
       headers: {
@@ -29,12 +50,13 @@ export async function initUser(email: string): Promise<InitResponse> {
     });
 
     if (!response.ok) {
-      throw new Error(`API Error: ${response.status}`);
+      const errorText = await response.text();
+      throw new Error(`API Error: ${response.status} - ${errorText}`);
     }
 
-    return await response.json();
+    const data = await response.json();
+    return data;
   } catch (error) {
-    console.error('Init user error:', error);
     throw error;
   }
 }
@@ -51,9 +73,6 @@ export async function onboardUser(userData: {
   biggest_obstacle?: string;
 }): Promise<OnboardResponse> {
   try {
-    console.log('[ONBOARD] Sending request to:', ONBOARD_URL);
-    console.log('[ONBOARD] Request data:', userData);
-
     const response = await fetch(ONBOARD_URL, {
       method: 'POST',
       headers: {
@@ -62,32 +81,24 @@ export async function onboardUser(userData: {
       body: JSON.stringify(userData),
     });
 
-    console.log('[ONBOARD] Response status:', response.status);
-    console.log('[ONBOARD] Response headers:', Object.fromEntries(response.headers.entries()));
-
     // Try to get the response body regardless of status
     const responseText = await response.text();
-    console.log('[ONBOARD] Response body (raw):', responseText);
 
     // Try to parse as JSON
     let responseData;
     try {
       responseData = JSON.parse(responseText);
-      console.log('[ONBOARD] Response body (parsed):', responseData);
     } catch (parseError) {
-      console.error('[ONBOARD] Failed to parse response as JSON:', parseError);
       throw new Error(`Invalid JSON response: ${responseText.substring(0, 100)}`);
     }
 
     // Check if response is ok (200-299 status)
     if (!response.ok) {
-      console.error('[ONBOARD] Non-OK status received:', response.status);
       throw new Error(`API Error: ${response.status} - ${responseText}`);
     }
 
     return responseData;
   } catch (error) {
-    console.error('[ONBOARD] Error during onboarding:', error);
     throw error;
   }
 }
@@ -118,7 +129,6 @@ export async function logWeight(logData: {
 
     return await response.json();
   } catch (error) {
-    console.error('Log weight error:', error);
     throw error;
   }
 }
@@ -143,8 +153,47 @@ export async function getLogs(email: string, limit: number = 100): Promise<GetLo
 
     return await response.json();
   } catch (error) {
-    console.error('Get logs error:', error);
     throw error;
+  }
+}
+
+/**
+ * POST to n8n admin auth webhook
+ * Authenticate admin user with password (server-side validation)
+ */
+export async function adminAuth(password: string): Promise<AdminAuthResponse> {
+  try {
+    if (!ADMIN_AUTH_URL) {
+      throw new Error(
+        'Admin authentication not configured. Please set VITE_N8N_ADMIN_AUTH_URL in environment variables.\n' +
+        'See docs/N8N_ADMIN_AUTH_SETUP.md for instructions.'
+      );
+    }
+
+    const response = await fetch(ADMIN_AUTH_URL, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ password }),
+    });
+
+    const data = await response.json();
+
+    // If response is not ok (401, etc.), the server sent an error message
+    if (!response.ok) {
+      return {
+        status: 'error',
+        message: data.message || 'Authentication failed'
+      };
+    }
+
+    return data;
+  } catch (error) {
+    return {
+      status: 'error',
+      message: 'Unable to connect to authentication server'
+    };
   }
 }
 

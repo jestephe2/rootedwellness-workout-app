@@ -6,13 +6,17 @@
   "framework": "vite",
   "rewrites": [
     {
-      "source": "/(.*)",
-      "destination": "/index.html"
+      "source": "/rootedworkout",
+      "destination": "/rootedworkout/index.html"
+    },
+    {
+      "source": "/rootedworkout/((?!assets/).*)",
+      "destination": "/rootedworkout/index.html"
     }
   ],
   "headers": [
     {
-      "source": "/assets/(.*)",
+      "source": "/rootedworkout/assets/(.*)",
       "headers": [
         {
           "key": "Cache-Control",

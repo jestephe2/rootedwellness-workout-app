@@ -97,6 +97,13 @@ export interface GetLogsResponse {
   logs?: WorkoutLog[];
 }
 
+export interface AdminAuthResponse {
+  status: 'ok' | 'error';
+  session_token?: string;
+  expires_at?: string;
+  message?: string;
+}
+
 // App state
 export interface AppState {
   email: string | null;
